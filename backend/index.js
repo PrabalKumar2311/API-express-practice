@@ -10,8 +10,6 @@ app.use(cors());   // 👈 allow frontend to call API
 const uri = "mongodb://localhost:27017";
 const client = new MongoClient(uri);
 
-const dbName = "cars";
-
 async function startServer() {
 
   try {
@@ -19,7 +17,7 @@ async function startServer() {
     await client.connect();
     console.log("Connected to MongoDB");
 
-    const db = client.db(dbName);
+    const db = client.db("cars");
     const collection = db.collection("supercars");
 
     app.get("/", async (req, res) => {

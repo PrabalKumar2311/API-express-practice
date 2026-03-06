@@ -5,36 +5,43 @@ const cors = require("cors");
 const app = express();
 const port = 3000;
 
-app.use(cors());   // 👈 allow frontend to call API
+app.use(cors());
 
 const uri = "mongodb://localhost:27017";
 const client = new MongoClient(uri);
 
+const dbName = "cars";
+
 async function startServer() {
 
-  try {
+  await client.connect();
+  console.log("Connected to MongoDB");
 
-    await client.connect();
-    console.log("Connected to MongoDB");
+  const db = client.db(dbName);
 
-    const db = client.db("cars");
-    const collection = db.collection("supercars");
+  // dynamic route
+  app.get("/api/cars/:type", async (req, res) => {
 
-    app.get("/", async (req, res) => {
+    try {
+
+      const type = req.params.type; // supercars or hypercars
+      const collection = db.collection(type);
 
       const cars = await collection.find().toArray();
 
       res.json(cars);
 
-    });
+    } catch (error) {
 
-    app.listen(port, () => {
-      console.log(`Server running at http://localhost:${port}`);
-    });
+      res.status(500).json({ error: "Failed to fetch cars" });
 
-  } catch (error) {
-    console.error("MongoDB connection error:", error);
-  }
+    }
+
+  });
+
+  app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+  });
 
 }
 
